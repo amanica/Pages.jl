@@ -39,7 +39,7 @@ mutable struct Public
 end
 Public(route,path) = Public(route,path) do request::HTTP.Request
     file = joinpath(path,basename(URI(request.resource).path))
-    isfile(file) ? readstring(file) : "File not found."
+    isfile(file) ? HTTP.Response(200,readstring(file)) : HTTP.Response(404,"Not Found")
 end
 
 # function Base.show(io::Base.IO,public::Public)
