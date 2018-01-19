@@ -12,36 +12,32 @@ const conditions = Dict{String,Condition}()
 conditions["connected"] = Condition()
 conditions["unloaded"] = Condition()
 
-Endpoint("/pages.js") do request::Request
-    readstring(joinpath(dirname(@__FILE__),"pages.js"))
+Endpoint("/pages.js") do request::HTTP.Request
+    HTTP.Response(200,readstring(joinpath(dirname(@__FILE__),"pages.js")))
 end
 
-ws = WebSocketHandler() do request::Request, client::WebSocket
-    while true
-        msg = JSON.parse(String(read(client)))
-        route = msg["route"]
-        if !haskey(pages[route].sessions,client.id)
-            pages[route].sessions[client.id] = client
-        end
-        haskey(msg,"args") ? callbacks[msg["name"]].callback(client,msg["args"]) : callbacks[msg["name"]].callback(client)
-    end
-end
-
-http = HttpHandler() do request::Request, response::Response
-    route = URI(request.resource).path
-    if haskey(pages,route)
-        res = Response(pages[route].handler(request))
-    elseif haskey(public,dirname(route))
-        res = Response(public[dirname(route)].handler(request))
-    else
-        res = "Page not found."
-    end
-    res
-end
-
-server = Server(http,ws)
+# ws = WebSocketHandler() do request::Request, client::WebSocket
+#     while true
+#         msg = JSON.parse(String(read(client)))
+#         route = msg["route"]
+#         if !haskey(pages[route].sessions,client.id)
+#             pages[route].sessions[client.id] = client
+#         end
+#         haskey(msg,"args") ? callbacks[msg["name"]].callback(client,msg["args"]) : callbacks[msg["name"]].callback(client)
+#     end
+# end
 
 function start(p = 8000)
     global port = p
-    run(server, port)
+    HTTP.listen(ip"127.0.0.1",p) do request::HTTP.Request
+        route = request.target
+        if haskey(pages,route)
+            response = pages[route].handler(request)
+        elseif haskey(public,dirname(route))
+            response = public[dirname(route)].handler(request)
+        else
+            response = HTTP.Response(404,"Not Found")
+        end
+        response
+    end
 end

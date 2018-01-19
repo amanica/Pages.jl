@@ -1,6 +1,6 @@
 module Pages
 
-using HttpServer, WebSockets, URIParser, JSON, DataFrames
+using HTTP, JSON, DataFrames
 using Compat; import Compat: String, @static
 
 export Endpoint, Callback, Request, Response, URI, query_params, launch
@@ -8,10 +8,11 @@ export Endpoint, Callback, Request, Response, URI, query_params, launch
 mutable struct Endpoint
     handler::Function
     route::String
-    sessions::Dict{Int,WebSocket}
+    # sessions::Dict{Int,WebSocket}
 
     function Endpoint(handler,route)
-        p = new(handler,route,Dict{Int,WebSocket}())
+        p = new(handler,route)
+        # p = new(handler,route,Dict{Int,WebSocket}())
         !haskey(pages,route) || warn("Page $route already exists.")
         pages[route] = p
         finalizer(p, p -> delete!(pages, p.route))
@@ -36,7 +37,7 @@ mutable struct Public
         p
     end
 end
-Public(route,path) = Public(route,path) do request::Request
+Public(route,path) = Public(route,path) do request::HTTP.Request
     file = joinpath(path,basename(URI(request.resource).path))
     isfile(file) ? readstring(file) : "File not found."
 end
@@ -46,10 +47,10 @@ end
 # end
 const public = Dict{String,Public}() # url => public
 
-include("callbacks.jl")
+# include("callbacks.jl")
 include("server.jl")
-include("api.jl")
-include("ijulia.jl")
+# include("api.jl")
+# include("ijulia.jl")
 
 include("../examples/examples.jl")
 
