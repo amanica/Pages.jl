@@ -13,7 +13,7 @@ conditions["connected"] = Condition()
 conditions["unloaded"] = Condition()
 
 Endpoint("/pages.js") do request::HTTP.Request
-    HTTP.Response(200,readstring(joinpath(dirname(@__FILE__),"pages.js")))
+    readstring(joinpath(dirname(@__FILE__),"pages.js"))
 end
 
 # ws = WebSocketHandler() do request::Request, client::WebSocket
@@ -38,6 +38,8 @@ function start(p = 8000)
         else
             response = HTTP.Response(404,"Not Found")
         end
-        response
+        return response isa HTTP.Response ?
+               response :
+               HTTP.Response(200, response)
     end
 end

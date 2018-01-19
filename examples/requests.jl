@@ -2,11 +2,11 @@ using JSON
 
 Endpoint("/examples/requests") do request::HTTP.Request
     if request.method == "GET"
-        response = HTTP.Response(200,readstring(joinpath(dirname(@__FILE__),"requests.html")))
+        response = readstring(joinpath(dirname(@__FILE__),"requests.html"))
     elseif request.method == "POST"
         data = String(request.body)
         println(data)
-        response = HTTP.Response(200,JSON.json(Dict(:data => data)))
+        response = JSON.json(Dict(:data => data))
     end
     response
 end
