@@ -1,5 +1,5 @@
 Endpoint("/examples") do request::HTTP.Request
-    HTTP.Response(200,readstring(joinpath(dirname(@__FILE__),"examples.html")))
+    readstring(joinpath(dirname(@__FILE__),"examples.html"))
 end
 
 # include("plotly.jl")
