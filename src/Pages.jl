@@ -26,6 +26,8 @@ function Base.show(io::Base.IO,endpoint::Endpoint)
 end
 const pages = Dict{String,Endpoint}() # url => page
 
+router = HTTP.Router()
+
 include("callbacks.jl")
 include("server.jl")
 include("api.jl")
