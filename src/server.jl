@@ -58,7 +58,7 @@ function start(p = 8000)
             if haskey(pages,route)
                 HTTP.Servers.handle_request(pages[route].handler,http)
             else
-                HTTP.Servers.handle_request((req) -> HTTP.Response(404),http)
+                HTTP.Servers.handle_request((req) -> HTTP.handle(router,req),http)
             end
         end
     end

@@ -6,9 +6,9 @@ using HTTP, JSON
 
 import HTTP.WebSockets.WebSocket
 
-export Endpoint, Callback, Plotly
+export Endpoint, Route, GET, POST, Callback, Plotly
 
-mutable struct Endpoint
+struct Endpoint
     handler::Function
     route::String
     sessions::Dict{String,WebSocket}
@@ -17,7 +17,6 @@ mutable struct Endpoint
         p = new(handler,route,Dict{String,WebSocket}())
         !haskey(pages,route) || warn("Page $route already exists.")
         pages[route] = p
-        finalizer(p, p -> delete!(pages, p.route))
         p
     end
 end
@@ -25,6 +24,26 @@ function Base.show(io::Base.IO,endpoint::Endpoint)
     print(io,"Endpoint created at $(endpoint.route).")
 end
 const pages = Dict{String,Endpoint}() # url => page
+
+router = HTTP.Router()
+
+struct Route
+    handler::Function
+    method::String
+    route::String
+
+    function Route(handler,method,route)
+        HTTP.register!(router,method,route,HTTP.HandlerFunction(handler))
+        r = new(handler,method,route)
+        !haskey(routes,route) || warn("Route $route already exists.")
+        routes[route] = r
+        r
+    end
+end
+const routes = Dict{String,Route}() # url => page
+
+GET(handler,route) = Route(handler,"GET",route)
+POST(handler,route) = Route(handler,"POST",route)
 
 include("callbacks.jl")
 include("server.jl")
