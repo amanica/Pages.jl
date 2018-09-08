@@ -58,6 +58,12 @@ function start(p = 8000)
             if haskey(pages,route)
                 HTTP.Servers.handle_request(pages[route].handler,http)
             else
+                for (regex, p) in regexPages
+                    if ismatch(regex, route)
+                        HTTP.Servers.handle_request(p.handler,http)
+                        return
+                    end
+                end
                 HTTP.Servers.handle_request((req) -> HTTP.Response(404),http)
             end
         end
