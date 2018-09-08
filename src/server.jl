@@ -60,7 +60,8 @@ function start(p = 8000)
             else
                 for (regex, p) in regexPages
                     if ismatch(regex, route)
-                        HTTP.Servers.handle_request(p.handler,http)
+                        # TODO: maybe pass in the parsed path parameters
+                        HTTP.Servers.handle_request(p.handler, http)
                         return
                     end
                 end
